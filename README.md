@@ -10,13 +10,25 @@ Exemple of use:
 
 	$form =  new Form($_POST);
 
-	$form->fields("email lastname username"); //the fields to be parse
-	$form->columns("mail lastname login"); //the columns in the database
-	$form->table("form"); //the table name
+	//the fields to be parse
+	$form->fields("email lastname username");
+
+	//the columns in the database
+	$form->columns("mail lastname login");
+
+	//the table name
+	$form->table("form");
+
 	// all these methods can be chained
-	// $form->fields("email lastname username")->columns("mail lastname login")->table("form");
-	$form->check("mail"); // This will check whether row already with the same mail already exist, You need to use the column name
-	$form->save(); // to save the database into the database
+	$form->fields("email lastname username")
+		->columns("mail lastname login")
+		->table("form");
+
+	// This will check whether row already exist with the same mail already exist, You need to use the column name
+	$form->check("mail"); 
+
+	// to save the database into the database
+	$form->save(); 
 
 There is also some methods to get informations:
 - DbProcess::showTables() return all the tables into the database
