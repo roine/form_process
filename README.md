@@ -8,15 +8,15 @@ First of all, you need to change the following informations into the DbProcess c
 - DATABASE
 Exemple of use:
 
-    $form =  new Form($_POST);
+	$form =  new Form($_POST);
 
-    $form->fields("email lastname username"); //the fields to be parse
-    $form->columns("mail lastname login"); //the columns in the database
-    $form->table("form"); //the table name
-    // all these methods can be chained
-    // $form->fields("email lastname username")->columns("mail lastname login")->table("form");
-    $form->check("mail"); // This will check whether row already with the same mail already exist, You need to use the column name
-    $form->save(); // to save the database into the database
+	$form->fields("email lastname username"); //the fields to be parse
+	$form->columns("mail lastname login"); //the columns in the database
+	$form->table("form"); //the table name
+	// all these methods can be chained
+	// $form->fields("email lastname username")->columns("mail lastname login")->table("form");
+	$form->check("mail"); // This will check whether row already with the same mail already exist, You need to use the column name
+	$form->save(); // to save the database into the database
 
 There is also some methods to get informations:
 - DbProcess::showTables() return all the tables into the database
