@@ -58,9 +58,9 @@ class Form{
 	}
 
 	// Save
-	public function save($table){
+	public function save(){
 		$validData = array_map("self::getValidFields", $this->aFields);
-		DbProcess::insert($table, $validData, $this->aColumns);
+		DbProcess::insert($validData, $this->aColumns);
 	}
 
 	// Call to check the data received
@@ -111,16 +111,24 @@ class DbProcess{
 		return $bdd;
 	}
 
-	public function insert($table, $fields, $columns){
-		$columns = empty($columns) ? self::getStructure($table, false) : $columns;
-
+	public function insert($fields, $columns){
+		$table = self::$sTable;
+		$bdd = self::dbConnect();
+		$sFields = "'".implode("', '", $fields)."'";
+		$sColumns = implode(", ", $columns);
+		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
+		$response = $bdd->prepare($sql);
+		if($response->execute())
+			echo "Successfully registered";
+		// $arr = $response->errorInfo();
+		// print_r($arr);
 	}
 
 	public function check($args){
-		$bdd = self::dbConnect();
 		$col = implode(", ", array_keys($args));
 		$val = implode(", ", $args);
 		$table = self::$sTable;
+		$bdd = self::dbConnect();
 		$sql = "SELECT count(*) AS total FROM $table WHERE $col=:val";
 
 		$response = $bdd->prepare($sql);
@@ -202,14 +210,14 @@ class Extras{
 $_POST["fn"] = "jonathan";
 $_POST["ln"] = "de montalembert";
 $_POST["mphone"] = "+8618600014793";
-$_POST["mail"] = "demonj@gmail.com";
+$_POST["mail"] = "papa@hotmail.fr";
 $_POST["country"] = "france";
 
 
 $form = new Form($_POST);
 $form->fields("fn ln mphone mail country")->columns("firstname lastname phone email country")->table("form");
 $form->check("email");
-$form->save("form");
+$form->save();
 // $c = new DbProcess();
 // $c->getStructure("form");
 ?>
