@@ -12,10 +12,14 @@ class Form{
 		$handler = array($dbProcess, $method);
 		$a = array_combine($this->aColumns, $this->aFields);
 		$key = $argv = "";
+		
+		if(count($arguments) <= 1){
+		$arguments = explode(" ", implode(" ", $arguments));
+		}
+
 		if(!is_callable($handler))
 			echo "There is no method ".$method." into DbProcess and Form Class!";
-		else{
-			
+		else{	
 			foreach($arguments as $k){
 				if(!isset($a[$k]))
 					exit("Error: ".$k." column do not exist in the database!");
@@ -25,19 +29,25 @@ class Form{
 			call_user_func_array($handler, array($argv));
 		}
 	}
-
+	// Constructor
 	public function __construct($post = array()){
 		$this->post = $post;
+		if(count($post) == 0)
+			exit("POST is empty!");
 	}
 	
 	// Set the fields form the form
 	public function fields($fields){
+		if(gettype($fields) != "string" || func_num_args() > 1)
+			die("Error: Please enter a string separated by space.<br>i.e: email phone lastname");
 		$this->aFields = explode(" ", $fields);
 		return $this;
 	}
 
 	// Set the columns name from the database
 	public function columns($columns){
+		if(gettype($columns) != "string" || func_num_args() > 1)
+			die("Error: Please enter a string separated by space.<br>i.e: email phone lastname");
 		$this->aColumns = explode(" ", $columns);
 		return $this;
 	}
@@ -76,8 +86,6 @@ class Form{
 }
 
 
-
-
 class DbProcess{
 
 	const HOST = "localhost";
@@ -104,14 +112,28 @@ class DbProcess{
 	}
 
 	public function insert($table, $fields, $columns){
-		if(empty($columns))
-			$columns = self::getStructure($table, false);
+		$columns = empty($columns) ? self::getStructure($table, false) : $columns;
+
 	}
 
 	public function check($args){
 		$bdd = self::dbConnect();
-		print_r(array_keys($args));
-		$response = $bdd->prepare("SELECT count(*) AS total FROM :table WHERE");
+		$col = implode(", ", array_keys($args));
+		$val = implode(", ", $args);
+		$table = self::$sTable;
+		$sql = "SELECT count(*) AS total FROM $table WHERE $col=:val";
+
+		$response = $bdd->prepare($sql);
+		$response->bindParam(':val', $val, PDO::PARAM_STR);
+		$response->execute();
+		$row = $response->fetch();
+		if($row["total"] > 0){
+			exit("Error: ".$val." already exist!");
+		}
+		// debug
+		// $arr = $response->errorInfo();
+
+
 	}
 
 	public function getStructure($table, $io = true){
@@ -119,11 +141,13 @@ class DbProcess{
 		$sql = "DESCRIBE ".$table;
 		$response = $bdd->prepare($sql);
 		$response->execute();
+
 		while($row = $response->fetch(PDO::FETCH_ASSOC)){
 			$total = Extras::pluralize("column", count($row));
 			$rows[] = $row;
 			$fields[] = $row["Field"];
 		}
+
 		if($io){
 			print "There is <b>".$total."</b> in <b>".$table."</b> table.<br />";
 			print implode(", ", $fields)."\n";
@@ -134,11 +158,13 @@ class DbProcess{
 		return $fields;
 	}
 
+
 	public function showTables($io = true){
 		$bdd = self::dbConnect();
 		$sql = "SHOW TABLES";
 		$response = $bdd->prepare($sql);
 		$response->execute();
+
 		while($row = $response->fetch()){
 			$tables[] = $row[0];
 		}
@@ -149,10 +175,12 @@ class DbProcess{
 		$str .= " in ".self::DATABASE.": <br />";
 		// liste of the tables
 		$str .= implode("<br />", $tables);
+
 		if($io)
 			echo $str;
 		return implode(", ", $tables);
 	}
+
 
 	public function __destruct(){
 		
@@ -172,15 +200,17 @@ class Extras{
 
 
 $_POST["fn"] = "jonathan";
-$_POST["ln"] = "montalembert";
+$_POST["ln"] = "de montalembert";
 $_POST["mphone"] = "+8618600014793";
-$_POST["mail"] = "feunetre@hotmail.com";
+$_POST["mail"] = "demonj@gmail.com";
 $_POST["country"] = "france";
+
 
 $form = new Form($_POST);
 $form->fields("fn ln mphone mail country")->columns("firstname lastname phone email country")->table("form");
-$form->check("email, firstname");
-
+$form->check("email");
 $form->save("form");
+// $c = new DbProcess();
+// $c->getStructure("form");
 ?>
 
