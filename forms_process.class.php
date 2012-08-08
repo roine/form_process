@@ -7,11 +7,12 @@ class ErrorMessages{
 	Phone number should be between %d and %d characteres.
 	Also the format should be as following +33123456789";
 	const EMAIL_FORMAT = "Error: Email format is invalid";
-	const METHOD_DOESNT_EXIST = "There is no method %s!";
-	const ALREADY_EXIST = "Error %s already exist";
+	const METHOD_DOESNT_EXIST = "Error:  There is no method %s!";
+	const ALREADY_EXIST = "Error: %s already exist";
 	const COLUMN_DOESNT_EXIST = "Error: %s column do not exist in the database!";
 	const IS_NOT_STRING = "Error: Please enter a string separated by space.<br>i.e: email phone lastname";
-	const COMBINE_IMPOSSIBLE = "Error: there is %d values and %d columns. There should have the same number";
+	const COMBINE_IMPOSSIBLE = "Error: There is %d values and %d columns. There should have the same number";
+	const MAX_MIN_LENGTH_ERROR = "%s contains %d characteres, while it should contains %d characteres!";
 }
 
 class Form{
@@ -86,6 +87,11 @@ class Form{
 		$validData = array_map("self::getValidFields", $this->aFields);
 		DbProcess::insert($validData, $this->aColumns);
 	}
+	// check whether the value exist
+	public function exist(){
+		DbProcess::exist($this->currentValue, array_search($this->currentColumn, $this->aCombined));
+		return $this;
+	}
 
 	// Call to check the data received
 	public function received(){
@@ -94,6 +100,7 @@ class Form{
 		echo "</pre>";
 
 	}
+
 	public function check($str){
 		$this->currentValue = $this->post[$str];
 		$this->currentColumn = $str;
@@ -109,9 +116,18 @@ class Form{
 		return $this;
 	}
 
-	public function maxLength($str, $length = 10){
+	public function maxLength($length = 10){
+		$str = $this->currentValue;
 		if(strlen($str) > $length){
-			exit($str." contains ".strlen($str)." characteres, while it should contains ".$length." characteres!");
+			exit(printf(ErrorMessages::MAX_MIN_LENGTH_ERROR, $str, strlen($str), $length));
+		}
+		return $this;
+	}
+
+	public function minLength($length = 10){
+		$str = $this->currentValue;
+		if(strlen($str) < $length){
+			exit(printf(ErrorMessages::MAX_MIN_LENGTH_ERROR, $str, strlen($str), $length));
 		}
 		return $this;
 	}
@@ -119,10 +135,11 @@ class Form{
 	public function isPhone($minlength = 5, $maxlength = 50){
 		$phone = $this->currentValue;
 		$error = sprintf(ErrorMessages::PHONE_FORMAT, $minlength, $maxlength);
-		$reg = "/1?\W*([2-9][0-8][0-9])\W*([2-9][0-9]{2})\W*([0-9]{4})(\se?x?t?(\d*))?/";
-		if(!preg_match($reg, $phone, $match) || (strlen($str) < $minlength && strlen($str) > $maxlength)){
+		$reg = "/^(([0\+]\d{2,5}-?)?\d{5,20}|\d{5,15})$/";
+		if(!preg_match($reg, $phone, $match) || (strlen($phone) < $minlength && strlen($phone) > $maxlength)){
 			exit(Extras::wrap($error, "span", "phoneError"));
 		}
+		return $this;
 	}
 
 	private function combine(){
@@ -177,6 +194,7 @@ class DbProcess{
 	public function insert($fields, $columns){
 		$table = self::$sTable;
 		$bdd = self::dbConnect();
+		$fields = get_magic_quotes_gpc() ? array_map("stripslashes", $fields) : $fields;
 		$sFields = "'".implode("', '", $fields)."'";
 		$sColumns = implode(", ", $columns);
 		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
@@ -187,24 +205,20 @@ class DbProcess{
 		// print_r($arr);
 	}
 
-	public function exist($args){
-		$col = implode(", ", array_keys($args));
-		$val = implode(", ", $args);
+	public function exist($val, $col){
 		$table = self::$sTable;
 		$bdd = self::dbConnect();
 		$sql = "SELECT count(*) AS total FROM $table WHERE $col=:val";
-
 		$response = $bdd->prepare($sql);
 		$response->bindParam(':val', $val, PDO::PARAM_STR);
 		$response->execute();
 		$row = $response->fetch();
+
 		if($row["total"] > 0){
 			exit(printf(ErrorMessages::ALREADY_EXIST, $val));
 		}
 		// debug
 		// $arr = $response->errorInfo();
-
-
 	}
 
 	public function getStructure($table, $io = true){
@@ -285,8 +299,8 @@ class Extras{
 
 $_POST["fn"] = "jonathan";
 $_POST["ln"] = "de montalembert";
-$_POST["mphone"] = "+86 18600014793";
-$_POST["mail"] = "papa@hotmail.fr";
+$_POST["mphone"] = "+8618600014793";
+$_POST["mail"] = "feunetre@shostmail.fr";
 $_POST["country"] = "france";
 
 
@@ -298,7 +312,8 @@ $form = new Form($_POST);
 $form->setFields("fn ln mphone mail country")->setColumns("firstname lastname phone email country")->setTable("form");
 date_default_timezone_set('Asia/Shanghai');
 
-$form->check("mail")->isEmail()->exist();
+$form->check("mail")->maxlength()->exist();
+$form->check("mphone")->isPhone()->save();
 
 // $form->isEmail("mail");
 // $form->isPhone("mphone", 8, 20);
