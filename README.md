@@ -2,10 +2,10 @@
 
 
 First of all, you need to change the following informations into the DbProcess class by your own informations:
-- HOST
-- USERNAME
-- PASSWORD
-- DATABASE
+- __HOST__
+- __USERNAME__
+- __PASSWORD__
+- __DATABASE__
 Exemple of use:
 
 	$form =  new Form($_POST);
@@ -34,10 +34,11 @@ Exemple of use:
 	$form->check("mail")->isEmail()->exist()->check("phone")->isPhone()->save();
 
 Here is the list of all the validation methods
-- isEmail, to check whether it's an email
-- isPhone, to check whether it's a phone number
-- exist, to check whether the data is already in the database
-- maxLength & minLength, to limit the length
+- __isEmail__, to check whether it's an email
+- __isPhone__, to check whether it's a phone number
+- __exist__, to check whether the data is already in the database
+- __maxLength__ & __minLength__, to limit the length
+
 Next validations methods:
 - it's a alphanumeric
 - it's a digit
@@ -54,6 +55,7 @@ Here are the methods to get informations:
 - check differents types(phone, email...)
 - able to add custom(ip, date...)
 - send email
+- fix the __call method with/without arguments
 
 
 ##V1##

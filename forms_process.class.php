@@ -3,9 +3,7 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 class ErrorMessages{
-	const PHONE_FORMAT = "Error: Format invalid!
-	Phone number should be between %d and %d characteres.
-	Also the format should be as following +33123456789";
+	const PHONE_FORMAT = "Error: Format invalid! Phone number should be between %d and %d characteres. Also the format should be as following +33123456789";
 	const EMAIL_FORMAT = "Error: Email format is invalid";
 	const METHOD_DOESNT_EXIST = "Error:  There is no method %s!";
 	const ALREADY_EXIST = "Error: %s already exist";
@@ -27,33 +25,28 @@ class Form{
 		// prepare the array for call_user_func_array
 		$dbProcess = new DbProcess();
 		$handler = array($dbProcess, $method);
-		
-		if($argc > 0){
-		$arguments = explode(" ", implode(" ", $arguments));
-		}
 
 		$key = ""; 
-		$argv = array();
+		$argv = $arguments;
 		if(!is_callable($handler))
 			exit(printf(ErrorMessages::METHOD_DOESNT_EXIST, $method));
 		else{
-			if($argc > 0){
-				foreach($arguments as $k){
-					if(!isset($a[$k]))
-						exit(printf(ErrorMessages::COLUMN_DOESNT_EXIST, $k));
-					$key = $a[$k];
-					$argv[$k] = $this->post[$key];
-				}
-			}
-			call_user_func_array($handler, array($argv));
+			// if($argc > 0){
+			// 	foreach($arguments as $k){
+			// 		if(!isset($a[$k]))
+			// 			exit(printf(ErrorMessages::COLUMN_DOESNT_EXIST, $k));
+			// 		$key = $a[$k];
+			// 		$argv[$k] = $this->post[$key];
+			// 	}
+			// }
+			call_user_func_array($handler, $argv);
 		}
 	}
 
 	// Constructor
 	public function __construct($post = array()){
 		$this->post = $post;
-		if(count($post) == 0)
-			exit("POST is empty!");
+		if(count($post) == 0) exit("POST is empty!");
 	}
 	
 	// Set the fields form the form
@@ -87,6 +80,7 @@ class Form{
 		$validData = array_map("self::getValidFields", $this->aFields);
 		DbProcess::insert($validData, $this->aColumns);
 	}
+
 	// check whether the value exist
 	public function exist(){
 		DbProcess::exist($this->currentValue, array_search($this->currentColumn, $this->aCombined));
@@ -101,12 +95,14 @@ class Form{
 
 	}
 
+	// set the value and the column name
 	public function check($str){
 		$this->currentValue = $this->post[$str];
 		$this->currentColumn = $str;
 		return $this;
 	}
 
+	// Check whether it's an email formatted
 	public function isEmail(){
 		$email = $this->currentValue;
 		$reg = "/^[^@]*@[^@]*\.[^@]*$/";
@@ -116,22 +112,7 @@ class Form{
 		return $this;
 	}
 
-	public function maxLength($length = 10){
-		$str = $this->currentValue;
-		if(strlen($str) > $length){
-			exit(printf(ErrorMessages::MAX_MIN_LENGTH_ERROR, $str, strlen($str), $length));
-		}
-		return $this;
-	}
-
-	public function minLength($length = 10){
-		$str = $this->currentValue;
-		if(strlen($str) < $length){
-			exit(printf(ErrorMessages::MAX_MIN_LENGTH_ERROR, $str, strlen($str), $length));
-		}
-		return $this;
-	}
-
+	// Check whether it's a phone type 
 	public function isPhone($minlength = 5, $maxlength = 50){
 		$phone = $this->currentValue;
 		$error = sprintf(ErrorMessages::PHONE_FORMAT, $minlength, $maxlength);
@@ -142,12 +123,32 @@ class Form{
 		return $this;
 	}
 
+	// check the max size
+	public function maxLength($length = 10){
+		$str = $this->currentValue;
+		if(strlen($str) > $length){
+			exit(printf(ErrorMessages::MAX_MIN_LENGTH_ERROR, $str, strlen($str), $length));
+		}
+		return $this;
+	}
+
+	// check the min size
+	public function minLength($length = 10){
+		$str = $this->currentValue;
+		if(strlen($str) < $length){
+			exit(printf(ErrorMessages::MAX_MIN_LENGTH_ERROR, $str, strlen($str), $length));
+		}
+		return $this;
+	}
+
+	// combine the fields and column into one array with key 
 	private function combine(){
 		if(count($this->aColumns) != count($this->aFields))
 			exit(printf(ErrorMessages::COMBINE_IMPOSSIBLE, count($this->aFields), count($this->aColumns)));
 		$this->aCombined = array_combine($this->aColumns, $this->aFields);
 	}
 
+	// 
 	private function getValidFields($str){
 		if(!isset($this->post[$str]) || gettype($this->post[$str]) != 'string'){
 			
@@ -243,10 +244,6 @@ class DbProcess{
 		return $fields;
 	}
 
-	public function papa(){
-		echo "papa";
-	}
-
 	public function showTables($io = true){
 		$bdd = self::dbConnect();
 		$sql = "SHOW TABLES";
@@ -262,8 +259,7 @@ class DbProcess{
 		// database name
 		$str .= " in ".self::DATABASE.": <br />";
 		// liste of the tables
-		$str .= implode("<br />", $tables);
-
+		$str .= implode("<br />", $tables)."<br />";
 		if($io)
 			echo $str;
 		return implode(", ", $tables);
@@ -279,7 +275,7 @@ class DbProcess{
 class Extras{
 
 	public function __construct(){
-		exit("Fobidden");
+		exit("Fobidden Access!");
 	}
 
 	public function pluralize($str, $count){
@@ -300,7 +296,7 @@ class Extras{
 $_POST["fn"] = "jonathan";
 $_POST["ln"] = "de montalembert";
 $_POST["mphone"] = "+8618600014793";
-$_POST["mail"] = "feunetre@shostmail.fr";
+$_POST["mail"] = "feunetre@hotmail.fr";
 $_POST["country"] = "france";
 
 
@@ -312,17 +308,13 @@ $form = new Form($_POST);
 $form->setFields("fn ln mphone mail country")->setColumns("firstname lastname phone email country")->setTable("form");
 date_default_timezone_set('Asia/Shanghai');
 
-$form->check("mail")->maxlength()->exist();
+echo $form->showTables(false);
+$form->check("mail")->isEmail()->exist();
 $form->check("mphone")->isPhone()->save();
 
-// $form->isEmail("mail");
-// $form->isPhone("mphone", 8, 20);
-// $form->check("email");
-// $form->save();
+
 $c = new DbProcess();
 
-// $p = new Extras();
-// echo $p->pluralize("papa", 10);
 
 ?>
 
