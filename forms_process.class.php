@@ -2,33 +2,52 @@
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
+class ErrorMessages{
+	const PHONE_FORMAT = "Error: Format invalid!
+	Phone number should be between %d and %d characteres.
+	Also the format should be as following +33123456789";
+	const EMAIL_FORMAT = "Error: Email format is invalid";
+	const METHOD_DOESNT_EXIST = "There is no method %s!";
+	const ALREADY_EXIST = "Error %s already exist";
+	const COLUMN_DOESNT_EXIST = "Error: %s column do not exist in the database!";
+	const IS_NOT_STRING = "Error: Please enter a string separated by space.<br>i.e: email phone lastname";
+	const COMBINE_IMPOSSIBLE = "Error: there is %d values and %d columns. There should have the same number";
+}
+
 class Form{
 
-	private $post, $aFields, $aColumns, $sTable;
+	private $post, $aFields, $aColumns, $sTable, $currentValue, $currentColumn, $aCombined;
 
 	// if the method doesnt exist the method is called in the DbProcess Class
 	public function __call($method, $arguments){
+		$argc = count($arguments);
+		$a = $this->aCombined;
+
+		// prepare the array for call_user_func_array
 		$dbProcess = new DbProcess();
 		$handler = array($dbProcess, $method);
-		$a = array_combine($this->aColumns, $this->aFields);
-		$key = $argv = "";
 		
-		if(count($arguments) <= 1){
+		if($argc > 0){
 		$arguments = explode(" ", implode(" ", $arguments));
 		}
 
+		$key = ""; 
+		$argv = array();
 		if(!is_callable($handler))
-			echo "There is no method ".$method." into DbProcess and Form Class!";
-		else{	
-			foreach($arguments as $k){
-				if(!isset($a[$k]))
-					exit("Error: ".$k." column do not exist in the database!");
-				$key = $a[$k];
-				$argv[$k] = $this->post[$key];
+			exit(printf(ErrorMessages::METHOD_DOESNT_EXIST, $method));
+		else{
+			if($argc > 0){
+				foreach($arguments as $k){
+					if(!isset($a[$k]))
+						exit(printf(ErrorMessages::COLUMN_DOESNT_EXIST, $k));
+					$key = $a[$k];
+					$argv[$k] = $this->post[$key];
+				}
 			}
 			call_user_func_array($handler, array($argv));
 		}
 	}
+
 	// Constructor
 	public function __construct($post = array()){
 		$this->post = $post;
@@ -37,25 +56,30 @@ class Form{
 	}
 	
 	// Set the fields form the form
-	public function fields($fields){
+	public function setFields($fields){
 		if(gettype($fields) != "string" || func_num_args() > 1)
-			die("Error: Please enter a string separated by space.<br>i.e: email phone lastname");
+			exit(ErrorMessages::IS_NOT_STRING);
 		$this->aFields = explode(" ", $fields);
+		if(!empty($this->aColumns))
+			$this->combine();
 		return $this;
 	}
 
 	// Set the columns name from the database
-	public function columns($columns){
+	public function setColumns($columns){
 		if(gettype($columns) != "string" || func_num_args() > 1)
-			die("Error: Please enter a string separated by space.<br>i.e: email phone lastname");
+			exit(ErrorMessages::IS_NOT_STRING);
 		$this->aColumns = explode(" ", $columns);
+		if(!empty($this->aFields))
+			$this->combine();
 		return $this;
 	}
 
-	public function table($table){
+	public function setTable($table){
 		$this->sTable = DbProcess::$sTable = $table;
 		return $this;
 	}
+
 
 	// Save
 	public function save(){
@@ -65,18 +89,57 @@ class Form{
 
 	// Call to check the data received
 	public function received(){
-		print_r($_REQUEST);
+		echo "<pre>";
+		echo var_dump($this->post);
+		echo "</pre>";
+
+	}
+	public function check($str){
+		$this->currentValue = $this->post[$str];
+		$this->currentColumn = $str;
+		return $this;
+	}
+
+	public function isEmail(){
+		$email = $this->currentValue;
+		$reg = "/^[^@]*@[^@]*\.[^@]*$/";
+		if(!preg_match($reg, $email, $m)){
+			exit(ErrorMessages::EMAIL_FORMAT);
+		}
+		return $this;
+	}
+
+	public function maxLength($str, $length = 10){
+		if(strlen($str) > $length){
+			exit($str." contains ".strlen($str)." characteres, while it should contains ".$length." characteres!");
+		}
+		return $this;
+	}
+
+	public function isPhone($minlength = 5, $maxlength = 50){
+		$phone = $this->currentValue;
+		$error = sprintf(ErrorMessages::PHONE_FORMAT, $minlength, $maxlength);
+		$reg = "/1?\W*([2-9][0-8][0-9])\W*([2-9][0-9]{2})\W*([0-9]{4})(\se?x?t?(\d*))?/";
+		if(!preg_match($reg, $phone, $match) || (strlen($str) < $minlength && strlen($str) > $maxlength)){
+			exit(Extras::wrap($error, "span", "phoneError"));
+		}
+	}
+
+	private function combine(){
+		if(count($this->aColumns) != count($this->aFields))
+			exit(printf(ErrorMessages::COMBINE_IMPOSSIBLE, count($this->aFields), count($this->aColumns)));
+		$this->aCombined = array_combine($this->aColumns, $this->aFields);
 	}
 
 	private function getValidFields($str){
 		if(!isset($this->post[$str]) || gettype($this->post[$str]) != 'string'){
-			$error = "<div class='error'>";
-			$error .= "Error: <b class='missing'>".strtoupper($str)."</b> does not exist, here is the list of received <b>";
+			
+			$error = "Error: <b class='missing'>".strtoupper($str)."</b> does not exist, here is the list of received <b>";
 			$error .= count($this->post)."</b> variables:<br />";
 			$error .= implode("<br />", array_keys($this->post));
 			$error .= "<br />While it should receive those <b>".count($this->aFields)."</b> variables:<br />";
 			$error .= implode("<br />", $this->aFields);
-			$error .= "</div>";
+			$error = Extras::wrap($error, "div", "error");
 			exit($error);
 		}
 		else
@@ -124,7 +187,7 @@ class DbProcess{
 		// print_r($arr);
 	}
 
-	public function check($args){
+	public function exist($args){
 		$col = implode(", ", array_keys($args));
 		$val = implode(", ", $args);
 		$table = self::$sTable;
@@ -136,7 +199,7 @@ class DbProcess{
 		$response->execute();
 		$row = $response->fetch();
 		if($row["total"] > 0){
-			exit("Error: ".$val." already exist!");
+			exit(printf(ErrorMessages::ALREADY_EXIST, $val));
 		}
 		// debug
 		// $arr = $response->errorInfo();
@@ -166,6 +229,9 @@ class DbProcess{
 		return $fields;
 	}
 
+	public function papa(){
+		echo "papa";
+	}
 
 	public function showTables($io = true){
 		$bdd = self::dbConnect();
@@ -197,11 +263,21 @@ class DbProcess{
 }
 
 class Extras{
+
+	public function __construct(){
+		exit("Fobidden");
+	}
+
 	public function pluralize($str, $count){
 		if($count > 1){
 			$str .= "s";
 		}
 		return $count." ".$str;
+	}
+
+	public function  wrap($str, $tag = "span", $id = '', $class = ''){
+
+		return "<".$tag." id=".$id." class=".$class.">".$str."</".$tag.">";
 	}
 	
 }
@@ -209,16 +285,29 @@ class Extras{
 
 $_POST["fn"] = "jonathan";
 $_POST["ln"] = "de montalembert";
-$_POST["mphone"] = "+8618600014793";
+$_POST["mphone"] = "+86 18600014793";
 $_POST["mail"] = "papa@hotmail.fr";
 $_POST["country"] = "france";
 
 
 $form = new Form($_POST);
-$form->fields("fn ln mphone mail country")->columns("firstname lastname phone email country")->table("form");
-$form->check("email");
-$form->save();
-// $c = new DbProcess();
-// $c->getStructure("form");
+
+// $form->received();
+// $form->getStructure("form");
+
+$form->setFields("fn ln mphone mail country")->setColumns("firstname lastname phone email country")->setTable("form");
+date_default_timezone_set('Asia/Shanghai');
+
+$form->check("mail")->isEmail()->exist();
+
+// $form->isEmail("mail");
+// $form->isPhone("mphone", 8, 20);
+// $form->check("email");
+// $form->save();
+$c = new DbProcess();
+
+// $p = new Extras();
+// echo $p->pluralize("papa", 10);
+
 ?>
 

@@ -35,9 +35,15 @@ There is also some methods to get informations:
 - DbProcess::getStructure("tableName") return the strucutre of the table
 - Form::received() return the $_REQUEST
 
+##V2 Coming##
+
+- check differents types(phone, email...)
+- able to add custom(ip, date...)
+
+
 ##V1##
 
-- able to check on column
+- able to check whether already exist
 - save into the database
-- get some informations
+- get some informations for developer
 
