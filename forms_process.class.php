@@ -196,6 +196,7 @@ class DbProcess{
 		$table = self::$sTable;
 		$bdd = self::dbConnect();
 		$fields = get_magic_quotes_gpc() ? array_map("stripslashes", $fields) : $fields;
+		$fields = array_map('mysql_real_escape_string', $fields);
 		$sFields = "'".implode("', '", $fields)."'";
 		$sColumns = implode(", ", $columns);
 		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
@@ -220,6 +221,7 @@ class DbProcess{
 		}
 		// debug
 		// $arr = $response->errorInfo();
+		// print_r($arr);
 	}
 
 	public function getStructure($table, $io = true){
@@ -296,7 +298,7 @@ class Extras{
 $_POST["fn"] = "jonathan";
 $_POST["ln"] = "de montalembert";
 $_POST["mphone"] = "+8618600014793";
-$_POST["mail"] = "feunetre@hotmail.fr";
+$_POST["mail"] = "feunetre@hotmail.frp ' OR ''='";
 $_POST["country"] = "france";
 
 
