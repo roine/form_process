@@ -58,12 +58,11 @@ Here are the methods to get informations:
 - DbProcess::getStructure("tableName") return the strucutre of the table
 - Form::received() return the $_REQUEST
 
-##V2 Coming##
+##V2##
 
-- check differents types(phone, email...) √
-- able to add custom(ip, date...) √
-- send email
-- fix the __call method with/without arguments
+- check differents types(phone, email...) 
+- able to add custom(ip, date...) 
+- fix the __call method with/without arguments 
 
 
 ##V1##
