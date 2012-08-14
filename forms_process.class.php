@@ -16,12 +16,13 @@ class ErrorMessages{
 class Form{
 
 	private $post, $aFields, $aColumns, $sTable, $currentValue, $currentColumn, $aCombined;
+	private $flag = true;
 
 	// if the method doesnt exist the method is called in the DbProcess Class
 	public function __call($method, $arguments){
 		$argc = count($arguments);
 		$a = $this->aCombined;
-
+		print_r($this->post);
 		// prepare the array for call_user_func_array
 		$dbProcess = new DbProcess();
 		$handler = array($dbProcess, $method);
@@ -53,8 +54,12 @@ class Form{
 	public function setFields($fields){
 		if(gettype($fields) != "string" || func_num_args() > 1)
 			exit(ErrorMessages::IS_NOT_STRING);
-		$this->aFields = explode(" ", $fields);
-		if(!empty($this->aColumns))
+		if(count($this->aFields) == 0)
+			$this->aFields = explode(" ", $fields);
+		else
+			$this->aFields[] = $fields;
+		$this->flag = !$this->flag;
+		if($this->flag)
 			$this->combine();
 		return $this;
 	}
@@ -63,8 +68,12 @@ class Form{
 	public function setColumns($columns){
 		if(gettype($columns) != "string" || func_num_args() > 1)
 			exit(ErrorMessages::IS_NOT_STRING);
-		$this->aColumns = explode(" ", $columns);
-		if(!empty($this->aFields))
+		if(count($this->aColumns) == 0)
+			$this->aColumns = explode(" ", $columns);
+		else
+			$this->aColumns[] = $columns;
+		$this->flag = !$this->flag;
+		if($this->flag)
 			$this->combine();
 		return $this;
 	}
@@ -92,7 +101,35 @@ class Form{
 		echo "<pre>";
 		echo var_dump($this->post);
 		echo "</pre>";
+	}
 
+	public function addIP($str = "user_ip"){
+		$this->setColumns($str);
+		$this->setFields($str);
+		$this->post[$str] = Extras::getIp();
+		return $this;
+	}
+
+	public function addDate($str = "created_at", $format = "Y-m-d H:i:s"){
+		$this->setColumns($str);
+		$this->setFields($str);
+		$this->post[$str] = date($format);
+		return $this;
+	}
+
+	public function add($str = "", $value = ""){
+		if(gettype($str) == "array"){
+			foreach($str as $k => $v){
+				$this->setColumns($k);
+				$this->setFields($k);
+				$this->post[$k] = $v;
+			}
+		}else{
+			$this->setColumns($str);
+			$this->setFields($str);
+			$this->post[$str] = $value;
+		}
+		return $this;
 	}
 
 	// set the value and the column name
@@ -200,6 +237,7 @@ class DbProcess{
 		$sFields = "'".implode("', '", $fields)."'";
 		$sColumns = implode(", ", $columns);
 		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
+		
 		$response = $bdd->prepare($sql);
 		if($response->execute())
 			echo "Successfully registered";
@@ -267,11 +305,6 @@ class DbProcess{
 		return implode(", ", $tables);
 	}
 
-
-	public function __destruct(){
-		
-	}
-
 }
 
 class Extras{
@@ -291,6 +324,16 @@ class Extras{
 
 		return "<".$tag." id=".$id." class=".$class.">".$str."</".$tag.">";
 	}
+
+	public function getIp() {
+	$ip = $_SERVER['REMOTE_ADDR'];
+	if (!empty($_SERVER['HTTP_CLIENT_IP'])) 
+		$ip = $_SERVER['HTTP_CLIENT_IP'];
+	elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) 
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+
+	return $ip;
+}
 	
 }
 
@@ -298,7 +341,7 @@ class Extras{
 $_POST["fn"] = "jonathan";
 $_POST["ln"] = "de montalembert";
 $_POST["mphone"] = "+8618600014793";
-$_POST["mail"] = "feunetre@hotmail.frp ' OR ''='";
+$_POST["mail"] = "reunetre@hotmail.com";
 $_POST["country"] = "france";
 
 
@@ -309,13 +352,10 @@ $form = new Form($_POST);
 
 $form->setFields("fn ln mphone mail country")->setColumns("firstname lastname phone email country")->setTable("form");
 date_default_timezone_set('Asia/Shanghai');
-
-echo $form->showTables(false);
-$form->check("mail")->isEmail()->exist();
+$form->add(array("fromURL"=> "google", "website" => "cn"));
+// echo $form->showTables();
+$form->check("mail")->isEmail();
 $form->check("mphone")->isPhone()->save();
-
-
-$c = new DbProcess();
 
 
 ?>

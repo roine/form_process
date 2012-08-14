@@ -61,7 +61,7 @@ Here are the methods to get informations:
 ##V2 Coming##
 
 - check differents types(phone, email...) √
-- able to add custom(ip, date...)
+- able to add custom(ip, date...) √
 - send email
 - fix the __call method with/without arguments
 
