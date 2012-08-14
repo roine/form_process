@@ -41,9 +41,12 @@ Here is an exemple how all the fields can be checked
 
 	$form->check("mail")->isEmail()->exist()->check("phone")->isPhone()->save();
 You can also add defined values
+
     $form->addIP("user_ip");
     $form->addDate("created_at");
+
 Or custom values by using array or string
+
 	$values = array("website"=>"english", "from_website"=> $_SERVER['HTTP_REFERER']);
 	$form->add($values);
 	$form->add("publish", "false") 
