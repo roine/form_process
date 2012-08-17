@@ -65,7 +65,7 @@ Next validations methods:
 
 Here are the methods to get informations:
 - DbProcess::showTables() return all the tables into the database
-- DbProcess::getStructure("tableName") return the strucutre of the table
+- DbProcess::getStructure("tableName") return the structure of the table
 - Form::received() return the $_REQUEST
 
 ##V2##

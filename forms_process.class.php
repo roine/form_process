@@ -233,13 +233,14 @@ class DbProcess{
 		$table = self::$sTable;
 		$bdd = self::dbConnect();
 		$fields = get_magic_quotes_gpc() ? array_map("stripslashes", $fields) : $fields;
-		$fields = array_map('mysql_real_escape_string', $fields);
-		$sFields = "'".implode("', '", $fields)."'";
-		$sColumns = implode(", ", $columns);
-		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
+		$columns = get_magic_quotes_gpc() ? array_map("stripslashes", $columns) : $columns;
 		
+		$sColumns = implode(", ", $columns);
+		$sFields = implode(',', array_fill(0, count($fields), '?'));
+		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
+
 		$response = $bdd->prepare($sql);
-		if($response->execute())
+		if($response->execute($fields))
 			echo "Successfully registered";
 		// $arr = $response->errorInfo();
 		// print_r($arr);
@@ -354,7 +355,7 @@ $form->setFields("fn ln mphone mail country")->setColumns("firstname lastname ph
 date_default_timezone_set('Asia/Shanghai');
 $form->add(array("fromURL"=> "google", "website" => "cn"));
 // echo $form->showTables();
-$form->check("mail")->isEmail();
+$form->check("mail")->exist()->isEmail();
 $form->check("mphone")->isPhone()->save();
 
 
