@@ -178,6 +178,7 @@ class Form{
 		return $this;
 	}
 
+
 	// combine the fields and column into one array with key 
 	private function combine(){
 		if(count($this->aColumns) != count($this->aFields))
@@ -221,7 +222,7 @@ class DbProcess{
 	// connection to
 	private function dbConnect(){
 		try{
-			$bdd = new PDO("mysql:host=".self::HOST.";dbname=".self::DATABASE, self::USERNAME, self::PASSWORD);
+			$bdd = new PDO("mysql:host=".self::HOST.";dbname=".self::DATABASE, self::USERNAME, self::PASSWORD, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 		}
 		catch(Exception $e){
 			die("error: ".$e->getMessage());
@@ -334,12 +335,9 @@ class Extras{
 		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 
 	return $ip;
-}
+	}
 	
 }
-
-
-
 
 ?>
 
