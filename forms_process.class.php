@@ -103,25 +103,23 @@ class Form{
 	}
 
 	public function addIP($str = 'user_ip'){
-		$this->setColumns($str);
-		$this->setFields($str);
-		$this->post[$str] = Extras::getIp();
+		$this->add($str, Extras::getIp());
 		return $this;
 	}
 
 	public function addDate($str = 'created_at', $format = "Y-m-d H:i:s"){
-		$this->setColumns($str);
-		$this->setFields($str);
-		$this->post[$str] = date($format);
+		$this->add($str, date($format));
 		return $this;
 	}
 
 	public function add($str = '', $value = ''){
 		if(gettype($str) == 'array'){
-			foreach($str as $k => $v){
-				$this->setColumns($k);
-				$this->setFields($k);
-				$this->post[$k] = $v;
+			$key = array_keys($str);
+			$size = count($key);
+			for($i = 0; $i < $size;$i++){
+				$this->setColumns($key[$i]);
+				$this->setFields($key[$i]);
+				$this->post[$key[$i]] = $str[$key[$i]];
 			}
 		}else{
 			$this->setColumns($str);
