@@ -68,14 +68,20 @@ Here are the methods to get informations:
 - DbProcess::getStructure("tableName") return the structure of the table
 - Form::received() return the $_REQUEST
 
-##V2##
+##V0.3 Comming##
+
+- add isEqualTo to compare, for example mail and mail confirmation
+- add isRequired to check whether the fields has value or not
+- fix the bug when receive array multidimentional
+
+##V0.2##
 
 - check differents types(phone, email...) 
 - able to add custom(ip, date...) 
 - fix the __call method with/without arguments 
 
 
-##V1##
+##V0.1##
 
 - able to check whether already exist
 - save into the database

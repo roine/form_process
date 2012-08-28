@@ -1,16 +1,16 @@
 <?php
 error_reporting(E_ALL);
-ini_set("display_errors", 1);
+ini_set('display_errors', 1);
 
 class ErrorMessages{
-	const PHONE_FORMAT = "Error: Format invalid! Phone number should be between %d and %d characteres. Also the format should be as following +33123456789";
-	const EMAIL_FORMAT = "Error: Email format is invalid";
-	const METHOD_DOESNT_EXIST = "Error:  There is no method %s!";
-	const ALREADY_EXIST = "Error: %s already exist";
-	const COLUMN_DOESNT_EXIST = "Error: %s column do not exist in the database!";
-	const IS_NOT_STRING = "Error: Please enter a string separated by space.<br>i.e: email phone lastname";
-	const COMBINE_IMPOSSIBLE = "Error: There is %d values and %d columns. There should have the same number";
-	const MAX_MIN_LENGTH_ERROR = "%s contains %d characteres, while it should contains %d characteres!";
+	const PHONE_FORMAT = 'Error: Format invalid! Phone number should be between %d and %d characteres. Also the format should be as following +33123456789, your is as following %d';
+	const EMAIL_FORMAT = 'Error: Email format is invalid';
+	const METHOD_DOESNT_EXIST = 'Error:  There is no method %s!';
+	const ALREADY_EXIST = 'Error: %s already exist';
+	const COLUMN_DOESNT_EXIST = 'Error: %s column do not exist in the database!';
+	const IS_NOT_STRING = 'Error: Please enter a string separated by space.<br>i.e: email phone lastname';
+	const COMBINE_IMPOSSIBLE = 'Error: There is %d values and %d columns. There should have the same number';
+	const MAX_MIN_LENGTH_ERROR = '%s contains %d characteres, while it should contains %d characteres!';
 }
 
 class Form{
@@ -22,12 +22,11 @@ class Form{
 	public function __call($method, $arguments){
 		$argc = count($arguments);
 		$a = $this->aCombined;
-		print_r($this->post);
 		// prepare the array for call_user_func_array
 		$dbProcess = new DbProcess();
 		$handler = array($dbProcess, $method);
 
-		$key = ""; 
+		$key = ''; 
 		$argv = $arguments;
 		if(!is_callable($handler))
 			exit(printf(ErrorMessages::METHOD_DOESNT_EXIST, $method));
@@ -47,15 +46,15 @@ class Form{
 	// Constructor
 	public function __construct($post = array()){
 		$this->post = $post;
-		if(count($post) == 0) exit("POST is empty!");
+		if(count($post) == 0) exit('POST is empty!');
 	}
 	
 	// Set the fields form the form
 	public function setFields($fields){
-		if(gettype($fields) != "string" || func_num_args() > 1)
+		if(gettype($fields) != 'string' || func_num_args() > 1)
 			exit(ErrorMessages::IS_NOT_STRING);
 		if(count($this->aFields) == 0)
-			$this->aFields = explode(" ", $fields);
+			$this->aFields = explode(' ', $fields);
 		else
 			$this->aFields[] = $fields;
 		$this->flag = !$this->flag;
@@ -66,10 +65,10 @@ class Form{
 
 	// Set the columns name from the database
 	public function setColumns($columns){
-		if(gettype($columns) != "string" || func_num_args() > 1)
+		if(gettype($columns) != 'string' || func_num_args() > 1)
 			exit(ErrorMessages::IS_NOT_STRING);
 		if(count($this->aColumns) == 0)
-			$this->aColumns = explode(" ", $columns);
+			$this->aColumns = explode(' ', $columns);
 		else
 			$this->aColumns[] = $columns;
 		$this->flag = !$this->flag;
@@ -98,27 +97,27 @@ class Form{
 
 	// Call to check the data received
 	public function received(){
-		echo "<pre>";
+		echo '<pre>';
 		echo var_dump($this->post);
-		echo "</pre>";
+		echo '</pre>';
 	}
 
-	public function addIP($str = "user_ip"){
+	public function addIP($str = 'user_ip'){
 		$this->setColumns($str);
 		$this->setFields($str);
 		$this->post[$str] = Extras::getIp();
 		return $this;
 	}
 
-	public function addDate($str = "created_at", $format = "Y-m-d H:i:s"){
+	public function addDate($str = 'created_at', $format = "Y-m-d H:i:s"){
 		$this->setColumns($str);
 		$this->setFields($str);
 		$this->post[$str] = date($format);
 		return $this;
 	}
 
-	public function add($str = "", $value = ""){
-		if(gettype($str) == "array"){
+	public function add($str = '', $value = ''){
+		if(gettype($str) == 'array'){
 			foreach($str as $k => $v){
 				$this->setColumns($k);
 				$this->setFields($k);
@@ -152,10 +151,10 @@ class Form{
 	// Check whether it's a phone type 
 	public function isPhone($minlength = 5, $maxlength = 50){
 		$phone = $this->currentValue;
-		$error = sprintf(ErrorMessages::PHONE_FORMAT, $minlength, $maxlength);
+		$error = sprintf(ErrorMessages::PHONE_FORMAT, $minlength, $maxlength, $this->currentValue);
 		$reg = "/^(([0\+]\d{2,5}-?)?\d{5,20}|\d{5,15})$/";
-		if(!preg_match($reg, $phone, $match) || (strlen($phone) < $minlength && strlen($phone) > $maxlength)){
-			exit(Extras::wrap($error, "span", "phoneError"));
+		if(!preg_match($reg, $phone, $match) || (strlen($phone) < $minlength || strlen($phone) > $maxlength)){
+			exit(Extras::wrap($error, 'span', 'phoneError'));
 		}
 		return $this;
 	}
@@ -190,11 +189,11 @@ class Form{
 	private function getValidFields($str){
 		if(!isset($this->post[$str]) || gettype($this->post[$str]) != 'string'){
 			
-			$error = "Error: <b class='missing'>".strtoupper($str)."</b> does not exist, here is the list of received <b>";
-			$error .= count($this->post)."</b> variables:<br />";
-			$error .= implode("<br />", array_keys($this->post));
-			$error .= "<br />While it should receive those <b>".count($this->aFields)."</b> variables:<br />";
-			$error .= implode("<br />", $this->aFields);
+			$error = "Error: <b class='missing'> {strtoupper($str)} </b> does not exist, here is the list of received <b>"
+					. "{count($this->post)}</b> variables:<br />"
+					. "{implode('<br />', array_keys($this->post))}"
+					. "<br />While it should receive those <b>{count($this->aFields)}</b> variables:<br />"
+					. "{implode('<br />', $this->aFields)}";
 			$error = Extras::wrap($error, "div", "error");
 			exit($error);
 		}
@@ -207,10 +206,10 @@ class Form{
 
 class DbProcess{
 
-	const HOST = "localhost";
-	const USERNAME = "test";
-	const PASSWORD = "123456";
-	const DATABASE = "test";
+	const HOST = 'localhost';
+	const USERNAME = 'test';
+	const PASSWORD = '123456';
+	const DATABASE = 'test';
 	public static $sTable;
 
 
@@ -233,16 +232,16 @@ class DbProcess{
 	public function insert($fields, $columns){
 		$table = self::$sTable;
 		$bdd = self::dbConnect();
-		$fields = get_magic_quotes_gpc() ? array_map("stripslashes", $fields) : $fields;
-		$columns = get_magic_quotes_gpc() ? array_map("stripslashes", $columns) : $columns;
+		$fields = get_magic_quotes_gpc() ? array_map('stripslashes', $fields) : $fields;
+		$columns = get_magic_quotes_gpc() ? array_map('stripslashes', $columns) : $columns;
 		
-		$sColumns = implode(", ", $columns);
+		$sColumns = implode(', ', $columns);
 		$sFields = implode(',', array_fill(0, count($fields), '?'));
 		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
 
 		$response = $bdd->prepare($sql);
 		if($response->execute($fields))
-			echo "Successfully registered";
+			echo 'Successfully registered';
 		// $arr = $response->errorInfo();
 		// print_r($arr);
 	}
@@ -256,7 +255,7 @@ class DbProcess{
 		$response->execute();
 		$row = $response->fetch();
 
-		if($row["total"] > 0){
+		if($row['total'] > 0){
 			exit(printf(ErrorMessages::ALREADY_EXIST, $val));
 		}
 		// debug
@@ -264,47 +263,50 @@ class DbProcess{
 		// print_r($arr);
 	}
 
-	public function getStructure($table, $io = true){
+	public function getStructure($table = null, $io = true){
+		if(gettype($table) === 'NULL'){
+			exit('No table defined');
+		}
 		$bdd = self::dbConnect();
-		$sql = "DESCRIBE ".$table;
+		$sql = "DESCRIBE {$table}";
 		$response = $bdd->prepare($sql);
 		$response->execute();
 
 		while($row = $response->fetch(PDO::FETCH_ASSOC)){
-			$total = Extras::pluralize("column", count($row));
+			$total = Extras::pluralize('column', count($row));
 			$rows[] = $row;
-			$fields[] = $row["Field"];
+			$fields[] = $row['Field'];
 		}
 
 		if($io){
-			print "There is <b>".$total."</b> in <b>".$table."</b> table.<br />";
-			print implode(", ", $fields)."\n";
-			print "<pre>";
+			print "There is <b>{$total}</b> in <b>{$table}</b> table.<br />";
+			print implode(', ', $fields)."\n";
+			print '<pre>';
 			print_r($rows);
-			print "</pre>";
+			print '</pre>';
 		}
 		return $fields;
 	}
 
 	public function showTables($io = true){
 		$bdd = self::dbConnect();
-		$sql = "SHOW TABLES";
+		$sql = 'SHOW TABLES';
 		$response = $bdd->prepare($sql);
 		$response->execute();
 
 		while($row = $response->fetch()){
 			$tables[] = $row[0];
 		}
-		$str = "There is ";
+		$str = 'There is '
 		// total number of tables
-		$str .= Extras::pluralize("table", count($tables));
+			. Extras::pluralize("table", count($tables))
 		// database name
-		$str .= " in ".self::DATABASE.": <br />";
+			. ' into the '.self::DATABASE.' database:<br />'
 		// liste of the tables
-		$str .= implode("<br />", $tables)."<br />";
+			. implode('<br />', $tables).'<br />';
 		if($io)
 			echo $str;
-		return implode(", ", $tables);
+		return implode(', ', $tables);
 	}
 
 }
@@ -312,19 +314,16 @@ class DbProcess{
 class Extras{
 
 	public function __construct(){
-		exit("Fobidden Access!");
+		exit('Fobidden Access!');
 	}
 
 	public function pluralize($str, $count){
-		if($count > 1){
-			$str .= "s";
-		}
-		return $count." ".$str;
+		return $count > 1 ? "$count {$str}s" : "$count $str";
 	}
 
-	public function  wrap($str, $tag = "span", $id = '', $class = ''){
+	public function  wrap($str, $tag = 'span', $id = '', $class = ''){
 
-		return "<".$tag." id=".$id." class=".$class.">".$str."</".$tag.">";
+		return "<$tag id='$id' class='$class'>$str</$tag>";
 	}
 
 	public function getIp() {
