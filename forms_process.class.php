@@ -20,13 +20,13 @@ class Form{
 
 	// if the method doesnt exist the method is called in the DbProcess Class
 	public function __call($method, $arguments){
-		$argc = count($arguments);
-		$a = $this->aCombined;
+		// $argc = count($arguments);
+		// $a = $this->aCombined;
 		// prepare the array for call_user_func_array
 		$dbProcess = new DbProcess();
 		$handler = array($dbProcess, $method);
 
-		$key = ''; 
+		// $key = ''; 
 		$argv = $arguments;
 		if(!is_callable($handler))
 			exit(printf(ErrorMessages::METHOD_DOESNT_EXIST, $method));
@@ -186,18 +186,16 @@ class Form{
 	// 
 	private function getValidFields($str){
 		if(!isset($this->post[$str]) || gettype($this->post[$str]) != 'string'){
-			
-			$error = "Error: <b class='missing'> {strtoupper($str)} </b> does not exist, here is the list of received <b>"
+			exit("Error: <b class='missing'> {strtoupper($str)} </b> does not exist, here is the list of received <b>"
 					. "{count($this->post)}</b> variables:<br />"
 					. "{implode('<br />', array_keys($this->post))}"
 					. "<br />While it should receive those <b>{count($this->aFields)}</b> variables:<br />"
-					. "{implode('<br />', $this->aFields)}";
-			$error = Extras::wrap($error, "div", "error");
-			exit($error);
+					. "{implode('<br />', $this->aFields)}"
+					. Extras::wrap($error, "div", "error"));
 		}
-		else
-			return $this->post[$str];
+		return $this->post[$str];
 	}
+
 
 }
 
@@ -232,11 +230,7 @@ class DbProcess{
 		$bdd = self::dbConnect();
 		$fields = get_magic_quotes_gpc() ? array_map('stripslashes', $fields) : $fields;
 		$columns = get_magic_quotes_gpc() ? array_map('stripslashes', $columns) : $columns;
-		
-		$sColumns = implode(', ', $columns);
-		$sFields = implode(',', array_fill(0, count($fields), '?'));
-		$sql = "INSERT INTO $table ($sColumns) VALUES ($sFields)";
-
+		$sql = "INSERT INTO $table (".implode(', ', $columns).") VALUES (".implode(',', array_fill(0, count($fields), '?')).")";
 		$response = $bdd->prepare($sql);
 		if($response->execute($fields))
 			echo 'Successfully registered';
@@ -266,8 +260,7 @@ class DbProcess{
 			exit('No table defined');
 		}
 		$bdd = self::dbConnect();
-		$sql = "DESCRIBE {$table}";
-		$response = $bdd->prepare($sql);
+		$response = $bdd->prepare("DESCRIBE {$table}");
 		$response->execute();
 
 		while($row = $response->fetch(PDO::FETCH_ASSOC)){
@@ -295,15 +288,15 @@ class DbProcess{
 		while($row = $response->fetch()){
 			$tables[] = $row[0];
 		}
-		$str = 'There is '
-		// total number of tables
-			. Extras::pluralize("table", count($tables))
-		// database name
-			. ' into the '.self::DATABASE.' database:<br />'
-		// liste of the tables
-			. implode('<br />', $tables).'<br />';
-		if($io)
-			echo $str;
+		if($io){
+			echo 'There is '
+			// total number of tables
+				. Extras::pluralize("table", count($tables))
+			// database name
+				. ' into the '.self::DATABASE.' database:<br />'
+			// liste of the tables
+				. implode('<br />', $tables).'<br />';
+		}
 		return implode(', ', $tables);
 	}
 
@@ -320,7 +313,6 @@ class Extras{
 	}
 
 	public function  wrap($str, $tag = 'span', $id = '', $class = ''){
-
 		return "<$tag id='$id' class='$class'>$str</$tag>";
 	}
 
