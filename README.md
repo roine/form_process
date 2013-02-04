@@ -72,9 +72,9 @@ Here are the methods to get informations:
 ## TODO ##
 - Testing to avoid regression
 - document the classes
-- replace the exists by error handler
+- replace the exit by error handler
 
-##V0.3 Comming##
+##V0.3 Coming##
 
 - add isEqualTo to compare, for example mail and mail confirmation
 - add isRequired to check whether the fields has value or not
