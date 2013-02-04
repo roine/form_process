@@ -7,14 +7,16 @@ $_POST["ln"] = "de montalembert";
 $_POST["mphone"] = "+8618600014793";
 $_POST["mail"] = "leunetre@hotmail.com";
 $_POST["country"] = "france";
-
+$_POST["city"] = "paris";
+$_POST['lang'] = 'en';
 
 $form = new Form($_POST);
+// $form->setConnection('localhost', 'root', '', 'fuel_dev');
 
 // $form->received();
-// $form->getStructure("form");
+$form->getStructure("form_homepage");
 
-$form->setFields("fn ln mphone mail country")->setColumns("firstname lastname phone email country")->setTable("form");
+$form->setValues("city fn mphone mail country lang")->setColumns("city name phone email country language")->setTable("form");
 date_default_timezone_set('Asia/Shanghai');
 $form->add(array("fromURL"=> "google", "website" => "cn"));
 $form->addIP("user_ip");
