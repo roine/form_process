@@ -35,7 +35,7 @@ This will add this field to the stack all the method after will use this data
 
 to save the database into the database
 
-	$form->save(); 
+	$form->save();
 
 Here is an exemple how all the fields can be checked
 
@@ -49,7 +49,7 @@ Or custom values by using array or string
 
 	$values = array("website"=>"english", "from_website"=> $_SERVER['HTTP_REFERER']);
 	$form->add($values);
-	$form->add("publish", "false") 
+	$form->add("publish", "false")
 
 Here is the list of all the validation methods
 - __isEmail__, to check whether it's an email
@@ -68,6 +68,12 @@ Here are the methods to get informations:
 - DbProcess::getStructure("tableName") return the structure of the table
 - Form::received() return the $_REQUEST
 
+
+## TODO ##
+- Testing to avoid regression
+- document the classes
+- replace the exists by error handler
+
 ##V0.3 Comming##
 
 - add isEqualTo to compare, for example mail and mail confirmation
@@ -76,9 +82,9 @@ Here are the methods to get informations:
 
 ##V0.2##
 
-- check differents types(phone, email...) 
-- able to add custom(ip, date...) 
-- fix the __call method with/without arguments 
+- check differents types(phone, email...)
+- able to add custom(ip, date...)
+- fix the __call method with/without arguments
 
 
 ##V0.1##
