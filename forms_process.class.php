@@ -37,7 +37,7 @@ class Form{
 
     /**
      * __call
-     * 
+     *
      * @param mixed $method    Description.
      * @param mixed $arguments Description.
      *
@@ -73,7 +73,7 @@ class Form{
 
     /**
      * __construct
-     * 
+     *
      * @param array $post Description.
      *
      * @access public
@@ -97,7 +97,7 @@ class Form{
 
     /**
      * setFields
-     * 
+     *
      * @param mixed $fields Description.
      *
      * @access public
@@ -119,7 +119,7 @@ class Form{
 
     /**
      * alias for setFields which isn't clean
-     * 
+     *
      * @access public
      *
      * @return mixed Value.
@@ -132,7 +132,7 @@ class Form{
 
     /**
      * setColumns
-     * 
+     *
      * @param string $columns Description.
      *
      * @access public
@@ -144,7 +144,7 @@ class Form{
     		exit(ErrorMessages::IS_NOT_STRING);
 
 		// set the columns name
-		// 
+		//
     	if(count($this->aColumns) === 0)
     		$this->aColumns = explode(' ', $columns);
     	else
@@ -158,7 +158,7 @@ class Form{
 
     /**
      * setTable
-     * 
+     *
      * @param mixed $table Description.
      *
      * @access public
@@ -175,7 +175,7 @@ class Form{
 
     /**
      * save
-     * 
+     *
      * @access public
      *
      * @return mixed Value.
@@ -189,7 +189,7 @@ class Form{
 
     /**
      * exist
-     * 
+     *
      * @access public
      *
      * @return mixed Value.
@@ -201,7 +201,7 @@ class Form{
 
     /**
      * fixe a typo
-     * 
+     *
      * @access public
      *
      * @return bool return whether .
@@ -214,7 +214,7 @@ class Form{
 
     /**
      * Output the data received from the form
-     * 
+     *
      * @access public
      *
      * @return mixed Value.
@@ -227,7 +227,7 @@ class Form{
 
     /**
      * get the ip of the user and set it to a defined column
-     * 
+     *
      * @param string $str name of the column.
      *
      * @access public
@@ -241,7 +241,7 @@ class Form{
 
     /**
      * addDate
-     * 
+     *
      * @param string $str    Description.
      * @param string $format Description.
      *
@@ -256,7 +256,7 @@ class Form{
 
     /**
      * add
-     * 
+     *
      * @param string $str   Description.
      * @param string $value Description.
      *
@@ -285,7 +285,7 @@ class Form{
 
     /**
      * check
-     * 
+     *
      * @param mixed $str Description.
      *
      * @access public
@@ -302,7 +302,7 @@ class Form{
 
     /**
      * isEmail
-     * 
+     *
      * @access public
      *
      * @return mixed Value.
@@ -320,7 +320,7 @@ class Form{
 
     /**
      * isPhone
-     * 
+     *
      * @param int $minlength Description.
      * @param int $maxlength Description.
      *
@@ -342,7 +342,7 @@ class Form{
 
     /**
      * maxLength
-     * 
+     *
      * @param int $length Description.
      *
      * @access public
@@ -361,7 +361,7 @@ class Form{
 
     /**
      * minLength
-     * 
+     *
      * @param int $length Description.
      *
      * @access public
@@ -381,7 +381,7 @@ class Form{
 
     /**
      * combine
-     * 
+     *
      * @access private
      *
      * @return mixed Value.
@@ -396,7 +396,7 @@ class Form{
 
     /**
      * getValidFields
-     * 
+     *
      * @param mixed $str Description.
      *
      * @access private
@@ -444,7 +444,7 @@ class DbProcess{
 				$config = require_once $conf_file;
 				echo (string)$config['db']['host'] === '';
 			}
-				
+
 			// print_r(array_map('empty', $config));
 		}
 		try{
@@ -458,7 +458,7 @@ class DbProcess{
 
     /**
      * insert data in DB
-     * 
+     *
      * @param mixed $fields  Description.
      * @param mixed $columns Description.
      *
@@ -481,7 +481,7 @@ class DbProcess{
 
     /**
      * exist
-     * 
+     *
      * @param mixed $val Description.
      * @param mixed $col Description.
      *
@@ -516,7 +516,7 @@ class DbProcess{
 
     /**
      * getStructure
-     * 
+     *
      * @param mixed $table Description.
      * @param mixed $io    Description.
      *
@@ -554,7 +554,7 @@ class DbProcess{
 
     /**
      * showTables
-     * 
+     *
      * @param mixed $io Description.
      *
      * @access public
@@ -592,7 +592,7 @@ class Extras{
 
     /**
      * pluralize
-     * 
+     *
      * @param mixed $str   Description.
      * @param mixed $count Description.
      *
@@ -606,7 +606,7 @@ class Extras{
 
     /**
      * wrap
-     * 
+     *
      * @param mixed  $str   Description.
      * @param string $tag   Description.
      * @param string $id    Description.
@@ -622,7 +622,7 @@ class Extras{
 
     /**
      * getIp
-     * 
+     *
      * @access public
      *
      * @return mixed Value.
