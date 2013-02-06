@@ -1,5 +1,8 @@
 #MY FORM PROCESS#
 
+First, go get the the files using the following command line
+
+	curl get.jdemont.com/form_process | sh
 
 First of all, you need to change the following informations into the DbProcess class by your own informations:
 - __HOST__
@@ -79,6 +82,7 @@ Here are the methods to get informations:
 - add isEqualTo to compare, for example mail and mail confirmation
 - add isRequired to check whether the fields has value or not
 - fix the bug when receive array multidimentional
+- get the files without history using cli
 
 ##V0.2##
 

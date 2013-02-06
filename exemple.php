@@ -14,7 +14,7 @@ $form = new Form($_POST);
 // $form->setConnection('localhost', 'root', '', 'fuel_dev');
 
 // $form->received();
-$form->getStructure("form_homepage");
+$form->getStructure("callback");
 
 $form->setValues("city fn mphone mail country lang")->setColumns("city name phone email country language")->setTable("form");
 date_default_timezone_set('Asia/Shanghai');
