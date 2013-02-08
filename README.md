@@ -2,7 +2,7 @@
 
 First, go get the the files using the following command line
 
-	curl get.jdemont.com/form_process | sh
+	curl -L get.jdemont.com/form_process | sh
 
 First of all, you need to change the following informations into the DbProcess class by your own informations:
 - __HOST__
