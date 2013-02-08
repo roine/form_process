@@ -533,34 +533,34 @@ class DbProcess {
             $match = 0;
             foreach($structure as $column){
                 if(self::check_similarity($key, $column) > $match){
-                     $match = self::check_similarity($key, $column);
-                     $columnMatch = $column;
-                }
-            }
-            echo "the best match for <b contenteditable title='please edit me if Im wrong'>$key</b> is <b title='please edit me if Im wrong' contenteditable>$columnMatch</b> (<span data-perc=$match>".round($match, 2)."</span>)<br>";
-        }
-    }
+                 $match = self::check_similarity($key, $column);
+                 $columnMatch = $column;
+             }
+         }
+         echo "The best match for <b contenteditable title='please edit me if Im wrong'>$key</b> is <b title='please edit me if Im wrong' contenteditable>$columnMatch</b> (<span data-perc=$match>".round($match, 2)."</span>)<br>";
+     }
+ }
 
-    private function check_similarity($str1, $str2){
-        similar_text($str1, $str2, $c);
+ private function check_similarity($str1, $str2){
+    similar_text($str1, $str2, $c);
 
         // start with same letter let's add 10 points, it might be initial
-        if($str1[0] == $str2[0]){
-            $c+=10;
-        }
+    if($str1[0] == $str2[0]){
+        $c+=10;
+    }
         // if it was already a perfect match reajust
-        if($c > 100){
-            $c = 100;
-        }
-        return $c;
+    if($c > 100){
+        $c = 100;
     }
+    return $c;
+}
 
-    public function setConnection( $host = '', $user = '', $password = '', $database = '' ) {
-        self::$host = $host;
-        self::$username = $user;
-        self::$password = $password;
-        self::$database = $database;
-    }
+public function setConnection( $host = '', $user = '', $password = '', $database = '' ) {
+    self::$host = $host;
+    self::$username = $user;
+    self::$password = $password;
+    self::$database = $database;
+}
     /**
      * setCredential
      *
@@ -772,6 +772,14 @@ class Extras {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 
         return $ip;
+    }
+
+    public static function print_var_name($v) {
+        $trace = debug_backtrace();
+        $vLine = file( __FILE__ );
+        $fLine = $vLine[ $trace[0]['line'] - 1 ];
+        preg_match( "#\\$(\w+)#", $fLine, $match );
+        print_r( $match );
     }
 
 }
