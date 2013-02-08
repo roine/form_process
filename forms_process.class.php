@@ -22,7 +22,8 @@ class Form {
      *
      * @access private
      */
-    private $post, $aFields, $aColumns, $sTable, $currentValue, $currentColumn, $aCombined;
+    private $aFields, $aColumns, $sTable, $currentValue, $currentColumn, $aCombined;
+    public static $post;
 
     /**
      * $flag
@@ -81,17 +82,12 @@ class Form {
      * @return mixed Value.
      */
     public function __construct( $post = array() ) {
-        $this->post = $post;
+        self::$post = $post;
         if ( count( $post ) === 0 ) {
             exit( 'POST is empty!' );
         }
     }
-    public function setConnection( $host = '', $user = '', $password = '', $database = '' ) {
-        DbProcess::$host = $host;
-        DbProcess::$username = $user;
-        DbProcess::$password = $password;
-        dbProcess::$database = $database;
-    }
+
 
     // Set the fields form the form
 
@@ -221,7 +217,7 @@ class Form {
      */
     public function received() {
         echo '<pre>';
-        echo var_dump( $this->post );
+        echo var_dump( self::$post );
         echo '</pre>';
     }
 
@@ -271,12 +267,12 @@ class Form {
             for ( $i = 0; $i < $size;$i++ ) {
                 $this->setColumns( $key[$i] );
                 $this->setFields( $key[$i] );
-                $this->post[$key[$i]] = $str[$key[$i]];
+                self::$post[$key[$i]] = $str[$key[$i]];
             }
         }else {
             $this->setColumns( $str );
             $this->setFields( $str );
-            $this->post[$str] = $value;
+            self::$post[$str] = $value;
         }
         return $this;
     }
@@ -293,7 +289,7 @@ class Form {
      * @return mixed Value.
      */
     public function check( $str ) {
-        $this->currentValue = $this->post[$str];
+        $this->currentValue = self::$post[$str];
         $this->currentColumn = $str;
         return $this;
     }
@@ -404,7 +400,7 @@ class Form {
      * @return mixed Value.
      */
     private function getValidFields( $str ) {
-        if ( !isset( $this->post[$str] ) || gettype( $this->post[$str] ) != 'string' ) {
+        if ( !isset( self::$post[$str] ) || gettype( self::$post[$str] ) != 'string' ) {
             exit( "Error: <b class='missing'> {strtoupper($str)} </b> does not exist, here is the list of received <b>"
                 . "{count($this->post)}</b> variables:<br />"
                 . "{implode('<br />', array_keys($this->post))}"
@@ -412,7 +408,7 @@ class Form {
                 . "{implode('<br />', $this->aFields)}"
                 . Extras::wrap( $error, "div", "error" ) );
         }
-        return $this->post[$str];
+        return self::$post[$str];
     }
 
 
@@ -512,7 +508,7 @@ class DbProcess {
      *
      * @return mixed Value.
      */
-    private function dbConnect() {
+    private static function dbConnect() {
 
         try{
             $bdd = new PDO( "mysql:host=".self::$host.";dbname=".self::$database, self::$username, self::$password, array( PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8' ) );
@@ -523,6 +519,48 @@ class DbProcess {
         return $bdd;
     }
 
+    public function start($table = null){
+
+        echo 'Ok, let\'s see what we have here!<br>';
+        echo 'I have received <b>'.count(Form::$post). '</b> values from the form.<br>';
+        if($table == null){
+            exit('to get more informations add the table name you want to use, like so $form->start("table_name")');
+        }
+        echo 'Now let\'s see the level of similarity with the columns name we have in the table <b>'.$table.'</b>...<br>';
+
+        $structure = self::getStructure($table, 0);
+        foreach(Form::$post as $key => $value){
+            $match = 0;
+            foreach($structure as $column){
+                if(self::check_similarity($key, $column) > $match){
+                     $match = self::check_similarity($key, $column);
+                     $columnMatch = $column;
+                }
+            }
+            echo "the best match for <b contenteditable title='please edit me if Im wrong'>$key</b> is <b title='please edit me if Im wrong' contenteditable>$columnMatch</b> (<span data-perc=$match>".round($match, 2)."</span>)<br>";
+        }
+    }
+
+    private function check_similarity($str1, $str2){
+        similar_text($str1, $str2, $c);
+
+        // start with same letter let's add 10 points, it might be initial
+        if($str1[0] == $str2[0]){
+            $c+=10;
+        }
+        // if it was already a perfect match reajust
+        if($c > 100){
+            $c = 100;
+        }
+        return $c;
+    }
+
+    public function setConnection( $host = '', $user = '', $password = '', $database = '' ) {
+        self::$host = $host;
+        self::$username = $user;
+        self::$password = $password;
+        self::$database = $database;
+    }
     /**
      * setCredential
      *
@@ -559,7 +597,7 @@ class DbProcess {
      *
      * @return mixed Value.
      */
-    public function insert( $fields, $columns ) {
+    public static function insert( $fields, $columns ) {
         $table = self::$sTable;
         $bdd = self::dbConnect();
         $fields = get_magic_quotes_gpc() ? array_map( 'stripslashes', $fields ) : $fields;
@@ -582,7 +620,7 @@ class DbProcess {
      *
      * @return mixed Value.
      */
-    public function exist( $val, $col ) {
+    public static function exist( $val, $col ) {
         $table = self::$sTable;
         $bdd = self::dbConnect();
         $sql = "SELECT count(*) AS total FROM $table WHERE $col=:val";
@@ -633,12 +671,10 @@ class DbProcess {
 
             if ( $io ) {
                 print "There is <b>{$total}</b> in <b>{$table}</b> table.<br />";
-                print array_map(function($str){
-                    return Extras::wrap($str, 'input');
-                }, $fields);
-                print '<pre>';
-                print_r( $rows );
-                print '</pre>';
+                // print_r($fields);
+                print implode("<br>", array_map(function($str, $row){
+                    return Extras::wrapper($str, 'input', array(), true).$row['Type'];
+                }, $fields, $rows));
             }
             return $fields;
         }
@@ -647,7 +683,7 @@ class DbProcess {
         }
     }
 
-    /**
+/**
      * showTables
      *
      * @param mixed   $io Description.
@@ -656,26 +692,26 @@ class DbProcess {
      *
      * @return mixed Value.
      */
-    public function showTables( $io = true ) {
-        $bdd = self::dbConnect();
-        $sql = 'SHOW TABLES';
-        $response = $bdd->prepare( $sql );
-        $response->execute();
+public function showTables( $io = true ) {
+    $bdd = self::dbConnect();
+    $sql = 'SHOW TABLES';
+    $response = $bdd->prepare( $sql );
+    $response->execute();
 
-        while ( $row = $response->fetch() ) {
-            $tables[] = $row[0];
-        }
-        if ( $io ) {
-            echo 'There is '
-            // total number of tables
-            . Extras::pluralize( "table", count( $tables ) )
-            // database name
-            . ' into the '.self::DATABASE.' database:<br />'
-            // liste of the tables
-            . implode( '<br />', $tables ).'<br />';
-        }
-        return implode( ', ', $tables );
+    while ( $row = $response->fetch() ) {
+        $tables[] = $row[0];
     }
+    if ( $io ) {
+        echo 'There is '
+            // total number of tables
+        . Extras::pluralize( "table", count( $tables ) )
+            // database name
+        . ' into the '.self::DATABASE.' database:<br />'
+            // liste of the tables
+        . implode( '<br />', $tables ).'<br />';
+    }
+    return implode( ', ', $tables );
+}
 
 }
 
@@ -713,6 +749,12 @@ class Extras {
      */
     public static function wrap( $str, $tag = 'span', $id = '', $class = '' ) {
         return "<$tag id='$id' class='$class'>$str</$tag>";
+    }
+    public static function wrapper($str, $tag, $attributes = array(), $selfclose = false){
+        if(!$selfclose)
+            return "<$tag ".implode(' ', $attributes).">$str</$tag>";
+
+        return "<$tag ".implode(' ', $attributes)." value='$str'/>";
     }
 
     /**

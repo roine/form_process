@@ -1,14 +1,9 @@
 #MY FORM PROCESS#
 
-First, go get the the files using the following command line
+First, go into the folder you want to install from process, and then run the following command line
 
 	curl -L get.jdemont.com/form_process | sh
 
-First of all, you need to change the following informations into the DbProcess class by your own informations:
-- __HOST__
-- __USERNAME__
-- __PASSWORD__
-- __DATABASE__
 
 Exemple of use:
 
