@@ -29,7 +29,7 @@ class formsTest  extends PHPUnit_Framework_TestCase
 
   function testSetFieldsException(){
     try{
-      return $result = $this->form->setFields('');
+      return $this->form->setFields('');
     }
     catch(Exception $e){
       return;
@@ -37,15 +37,32 @@ class formsTest  extends PHPUnit_Framework_TestCase
     $this->fail('An expected exception has not been raised.');
   }
 
-  function testSetValuesAliasOfSetField(){
-    $this->assertTrue(gettype($this->form->setValues('')) == 'object');
-  }
-
   function testSetFields(){
     $this->form->aFields = array('fn');
     $this->form->setFields('ln email phone')->setFields('yoursistername')->add('ip', '192.168.0.1');
     $expected = array('fn', 'ln', 'email', 'phone', 'yoursistername', 'ip');
     $this->assertEquals($this->form->aFields, $expected);
+  }
+
+  function testSetValuesAliasOfSetField(){
+    $this->assertTrue(gettype($this->form->setValues('fn')) == 'object');
+  }
+
+  function setColumnsException(){
+    try{
+      return $this->form->setColumns('');
+    }
+    catch(Exception $e){
+      return;
+    }
+    $this->fail('An expected exception has not been raised.');
+  }
+
+  function setColumns(){
+    $this->form->aColumns = array('name');
+    $this->form->setColumns('email phone')->setColumns('yoursistername')->add('ip', '192.168.0.1');
+    $expected = array('name', 'email', 'phone', 'yoursistername', 'ip');
+    $this->assertEquals($this->form->aColumns, $expected);
   }
 
 

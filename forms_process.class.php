@@ -102,7 +102,7 @@ class Form {
    * @return mixed Value.
    */
   public function setFields( $fields = null ) {
-    if ( gettype( $fields ) != 'string' || func_num_args() > 1 )
+    if ( gettype( $fields ) != 'string' || func_num_args() > 1 || empty( $fields ) )
       throw new Exception( ErrorMessages::IS_NOT_STRING );
 
     $this->aFields = array_merge((array)$this->aFields, explode( ' ', $fields ));
@@ -136,14 +136,10 @@ class Form {
    */
   public function setColumns( $columns = '' ) {
     if ( gettype( $columns ) != 'string' || func_num_args() > 1 || empty( $columns ) )
-      exit( ErrorMessages::IS_NOT_STRING );
+      throw new Exception( ErrorMessages::IS_NOT_STRING );
 
-    // set the columns name
-    //
-    if ( count( $this->aColumns ) === 0 )
-      $this->aColumns = explode( ' ', $columns );
-    else
-      $this->aColumns = array_merge( $this->aColumns, explode( ' ', $columns ) );
+    // select the columns where will be saved the data
+    $this->aColumns = array_merge( (array)$this->aColumns, explode( ' ', $columns ) );
 
     if ( $this->aFields )
       $this->combine();
