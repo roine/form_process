@@ -57,25 +57,17 @@ class Form {
    * @return mixed Value.
    */
   public function __call( $method, $arguments ) {
-    // $argc = count($arguments);
-    // $a = $this->aCombined;
-    // prepare the array for call_user_func_array
+
     if ( !$this->dbProcess )
       $this->dbProcess = new DbProcess();
+
+    // prepare the array for call_user_func_array
     $handler = array( $this->dbProcess, $method );
-    // $key = '';
+
     $argv = $arguments;
     if ( !is_callable( $handler ) )
       exit( printf( ErrorMessages::METHOD_DOESNT_EXIST, $method ) );
     else {
-      // if($argc > 0){
-      //  foreach($arguments as $k){
-      //   if(!isset($a[$k]))
-      //    exit(printf(ErrorMessages::COLUMN_DOESNT_EXIST, $k));
-      //   $key = $a[$k];
-      //   $argv[$k] = $this->post[$key];
-      //  }
-      // }
       call_user_func_array( $handler, $argv );
     }
   }
@@ -101,7 +93,7 @@ class Form {
   }
 
   /**
-   * setFields
+   * create an array containing all
    *
    * @param mixed   $fields Description.
    *
@@ -113,14 +105,7 @@ class Form {
     if ( gettype( $fields ) != 'string' || func_num_args() > 1 )
       throw new Exception( ErrorMessages::IS_NOT_STRING );
 
-    // only when words separated by spaces
-    if ( preg_match("/^(\s*[a-zA-Z]+(([\'\-\+\s]\s*[a-zA-Z])?[a-zA-Z]*)\s*)+$/", $fields)){
-      $this->aFields = array_merge((array)$this->aFields, explode( ' ', $fields ));
-    }
-    else{
-      $this->aFields[] = $fields;
-    }
-
+    $this->aFields = array_merge((array)$this->aFields, explode( ' ', $fields ));
     // if columns are also defined then combine them
     if ( $this->aColumns )
       $this->combine();
@@ -397,7 +382,7 @@ class Form {
   private function combine() {
     if ( count( $this->aColumns ) != count( $this->aFields ) ){
       return;
-       exit( printf( ErrorMessages::COMBINE_IMPOSSIBLE, count( $this->aFields ), count( $this->aColumns ) ) );
+      exit( printf( ErrorMessages::COMBINE_IMPOSSIBLE, count( $this->aFields ), count( $this->aColumns ) ) );
     }
     $this->aCombined = array_combine( $this->aColumns, $this->aFields );
   }

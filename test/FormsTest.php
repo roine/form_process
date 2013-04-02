@@ -36,6 +36,7 @@ class formsTest  extends PHPUnit_Framework_TestCase
     }
     $this->fail('An expected exception has not been raised.');
   }
+
   function testSetValuesAliasOfSetField(){
     $this->assertTrue(gettype($this->form->setValues('')) == 'object');
   }
