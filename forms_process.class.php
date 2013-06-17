@@ -172,7 +172,7 @@ class Form {
    */
   public function save() {
     $validData = array_map( "self::getValidFields", $this->aFields );
-    DbProcess::insert( $validData, $this->aColumns );
+    return DbProcess::insert( $validData, $this->aColumns );
   }
 
   // check whether the value exist
@@ -395,13 +395,14 @@ class Form {
    * @return mixed Value.
    */
   private function getValidFields( $str ) {
+    $str = ltrim($str);
     if ( !isset( self::$post[$str] ) || gettype( self::$post[$str] ) != 'string' ) {
-      exit( "Error: <b class='missing'> {strtoupper($str)} </b> does not exist, here is the list of received <b>"
-        . "{count($this->post)}</b> variables:<br />"
-        . "{implode('<br />', array_keys($this->post))}"
-        . "<br />While it should receive those <b>{count($this->aFields)}</b> variables:<br />"
-        . "{implode('<br />', $this->aFields)}"
-        . Extras::wrap( $error, "div", "error" ) );
+      $error = "Error: <b class='missing'> {strtoupper($str)} </b> does not exist, here is the list of received <b>"
+        . "{count(self::post)}</b> variables:<br />"
+        . implode('<br />', array_keys(self::$post))
+        . "<br />While it should receive those <b>".count($this->aFields)."</b> variables:<br />"
+        . implode('<br />', $this->aFields);
+        Extras::wrap( $error, "div", "error" );
     }
     return self::$post[$str];
   }
@@ -489,12 +490,19 @@ class DbProcess {
    * @return mixed Value.
    */
   public function __construct() {
-    if ( !isset( $this->connection ) ) {
-      self::setCredential();
 
-      $this->connection = $this->dbConnect();
-    }
-  }
+    if ( !isset( $this->connection ) ) {
+      try{
+       self::setCredential();
+     }
+     catch(Exception $e){
+       echo $e;
+     }
+
+
+     $this->connection = $this->dbConnect();
+   }
+ }
 
 
   /**
@@ -530,8 +538,11 @@ class DbProcess {
    */
   private function setCredential() {
     $conf_file = self::$conf_file;
-    if ( file_exists( $conf_file ) ) {
+    if ( file_exists( dirname(__FILE__).'/'.$conf_file ) ) {
       $config = require_once $conf_file;
+    }
+    else{
+      throw new Exception('Configuration file does not exists');
     }
     if ( is_null( self::$host ) ) {
       self::$host = $config['db']['host'];
@@ -564,8 +575,8 @@ class DbProcess {
     $columns = get_magic_quotes_gpc() ? array_map( 'stripslashes', $columns ) : $columns;
     $sql = "INSERT INTO $table (".implode( ', ', $columns ).") VALUES (".implode( ',', array_fill( 0, count( $fields ), '?' ) ).")";
     $response = $bdd->prepare( $sql );
-    if ( $response->execute( $fields ) )
-      echo 'Successfully registered';
+    $saved = $response->execute( $fields );
+    return $saved;
     // $arr = $response->errorInfo();
     // print_r($arr);
   }
